@@ -28,18 +28,12 @@ namespace BankSystem.Services
             if (person is Client)
             {
                 var client = person as Client;
-                if (clients.Contains(client))
-                {
-                    return client;
-                }
+                return clients.Find(item => item.Passport == client.Passport);
             }
             else if (person is Employee)
             {
                 var employee = person as Employee;
-                if (employees.Contains(employee))
-                {
-                    return employee;
-                }
+                return employees.Find(item => item.Passport == employee.Passport);
             }
             return null;
         }
