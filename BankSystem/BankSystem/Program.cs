@@ -6,6 +6,8 @@ namespace BankSystem
 {
     class Program
     {
+        public static object BankServicies { get; private set; }
+
         static void Main(string[] args)
         {            
             Console.ReadLine();
