@@ -1,14 +1,40 @@
 ﻿using System;
 using BankSystem.Models;
 using System.Collections.Generic;
+using BankSystem.Exceptions;
 
 namespace BankSystem.Services
 {
     public class BankServices
     {
+        private static Dictionary<Client, List<Account>> peoples = new Dictionary<Client, List<Account>>();
 
         private static List<Client> clients = new List<Client>();
         private static List<Employee> employees = new List<Employee>();
+
+
+        public delegate decimal ExchangeHandler<T, K>(decimal sum, T firstCurrencyType, K secondCurrencyType) where T : Currency where K : Currency;
+
+        private ExchangeHandler<Currency, Currency> _exchangeHandler;
+
+        public void DelegateRegister(ExchangeHandler<Currency, Currency> convertHandler)
+        {
+            try
+            {
+                if (convertHandler == null)
+                {
+                    throw new ArgumentNullException();
+                }
+
+                _exchangeHandler = convertHandler;
+
+            }
+            catch (ArgumentNullException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
         public void Add<T>(T person) where T : IPerson
         {
             if (person is Client)
@@ -51,7 +77,7 @@ namespace BankSystem.Services
             return result;
         }
 
-        void CheckNull<T>(T result) where T : IPerson 
+        void CheckNull<T>(T result) where T : IPerson
         {
             try
             {
@@ -65,5 +91,46 @@ namespace BankSystem.Services
                 Console.WriteLine(nullException.Message);
             }
         }
+
+        public void MoneyTransfer(int sum, Account donorAccaunt, Account recipientAccaunt, ExchangeHandler<Currency, Currency> convertHandler)
+        {
+            try
+            {
+                if (sum < 0)
+                {
+                    throw new ArgumentOutOfRangeException("Сумма не может быть отрицательной");
+                }
+                if (donorAccaunt.Money < convertHandler.Invoke(sum, donorAccaunt.CurrencyType, recipientAccaunt.CurrencyType))
+                {
+                    throw new InsufficientFundsException("Недостаточно средств на счете");
+                }
+                donorAccaunt.Money -= convertHandler.Invoke(sum, donorAccaunt.CurrencyType, recipientAccaunt.CurrencyType);
+                recipientAccaunt.Money += sum;
+            }
+            catch (ArgumentOutOfRangeException argumentOutOfRangeException)
+            {
+                Console.WriteLine(argumentOutOfRangeException.Message);
+            }
+            catch (InsufficientFundsException insufficientFundsException)
+            {
+                Console.WriteLine(insufficientFundsException.Message);
+            }
+        }
+
+        public void AddClientAccount(Client client, Account account)
+        {
+            List<Account> list = new List<Account>();
+
+            if (peoples.ContainsKey(client))
+            {
+                peoples[client].Add(account);
+            }
+            else
+            {
+                list.Add(account);
+                peoples.Add(client, list);
+            }
+        }
     }
 }
+

@@ -1,6 +1,6 @@
-﻿
-
+﻿using System;
 using BankSystem.Models;
+using static BankSystem.Services.BankServices;
 
 namespace BankSystem.Services
 {
@@ -9,6 +9,6 @@ namespace BankSystem.Services
         public decimal Converter<T, K>(decimal sum, T firstCurrencyType, K secondCurrencyType) where T : Currency where K : Currency
         {
             return (sum / firstCurrencyType.Price) * secondCurrencyType.Price;
-        }
+        }        
     }
 }
