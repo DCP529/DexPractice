@@ -16,7 +16,7 @@ namespace BankSystem
 
             Client client = new Client() { Name = "", Age = 150, Passport = 1 };
 
-            var exchangeHandler = new BankServices.ExchangeHandler<Currency, Currency>(exchange.Converter);
+            var exchangeHandler = new Func<decimal, Currency, Currency, decimal>(exchange.Converter);
 
             bankServices.AddClientAccount(client, account2);
             bankServices.AddClientAccount(client, account1);

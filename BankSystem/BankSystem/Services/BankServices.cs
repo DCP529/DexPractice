@@ -13,11 +13,9 @@ namespace BankSystem.Services
         private static List<Employee> employees = new List<Employee>();
 
 
-        public delegate decimal ExchangeHandler<T, K>(decimal sum, T firstCurrencyType, K secondCurrencyType) where T : Currency where K : Currency;
+        private Func<decimal, Currency, Currency, decimal> _convertHandler;
 
-        private ExchangeHandler<Currency, Currency> _exchangeHandler;
-
-        public void DelegateRegister(ExchangeHandler<Currency, Currency> convertHandler)
+        public void DelegateRegister(Func<decimal, Currency, Currency, decimal> convertHandler)
         {
             try
             {
@@ -26,7 +24,7 @@ namespace BankSystem.Services
                     throw new ArgumentNullException();
                 }
 
-                _exchangeHandler = convertHandler;
+                _convertHandler = convertHandler;
 
             }
             catch (ArgumentNullException e)
@@ -92,7 +90,7 @@ namespace BankSystem.Services
             }
         }
 
-        public void MoneyTransfer(int sum, Account donorAccaunt, Account recipientAccaunt, ExchangeHandler<Currency, Currency> convertHandler)
+        public void MoneyTransfer(int sum, Account donorAccaunt, Account recipientAccaunt, Func<decimal, Currency, Currency, decimal> convertHandler)
         {
             try
             {
@@ -100,12 +98,13 @@ namespace BankSystem.Services
                 {
                     throw new ArgumentOutOfRangeException("Сумма не может быть отрицательной");
                 }
-                if (donorAccaunt.Money < convertHandler.Invoke(sum, donorAccaunt.CurrencyType, recipientAccaunt.CurrencyType))
+                if (donorAccaunt.Money < sum)
                 {
                     throw new InsufficientFundsException("Недостаточно средств на счете");
                 }
-                donorAccaunt.Money -= convertHandler.Invoke(sum, donorAccaunt.CurrencyType, recipientAccaunt.CurrencyType);
-                recipientAccaunt.Money += sum;
+
+                donorAccaunt.Money -= sum;
+                recipientAccaunt.Money += convertHandler.Invoke(sum, donorAccaunt.CurrencyType, recipientAccaunt.CurrencyType);
             }
             catch (ArgumentOutOfRangeException argumentOutOfRangeException)
             {
