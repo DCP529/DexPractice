@@ -2,6 +2,10 @@
 using BankSystem.Models;
 using System.Collections.Generic;
 using BankSystem.Exceptions;
+using System.IO;
+using System.Text;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace BankSystem.Services
 {
@@ -35,19 +39,31 @@ namespace BankSystem.Services
 
         public void Add<T>(T person) where T : IPerson
         {
+            string path = Path.Combine("C:", "Users", "37377", "Documents", "GitHub", "DexPractice", "BankSystem", "DataPerson");
             if (person is Client)
             {
                 var client = person as Client;
                 clients.Add(client);
+                WriteFile(path, person, "Client");
             }
             else if (person is Employee)
             {
                 var employee = person as Employee;
                 employees.Add(employee);
+                WriteFile(path, person, "Employee");
             }
         }
 
-        IPerson Find<T>(T person) where T : IPerson
+        private void WriteFile(string path, IPerson person, string nameFile)
+        {
+            using (FileStream fileStream = new FileStream($"{path}\\{nameFile}.txt", FileMode.Append))
+            {
+                byte[] array = Encoding.Default.GetBytes($"Имя - {person.Name}, Возраст - {person.Age} лет, Паспорт - {person.Passport} \n");
+                fileStream.Write(array, 0, array.Length);
+            }
+        }
+
+        private IPerson Find<T>(T person) where T : IPerson
         {
             if (person is Client)
             {
@@ -62,6 +78,23 @@ namespace BankSystem.Services
             return null;
         }
 
+        //private IPerson FindInFile(string path, string name, IPerson person) // не работает
+        //{
+        //    using (FileStream fileStream = new FileStream($"{path}\\{name}.txt", FileMode.Open))
+        //    {
+        //        byte[] array = new byte[fileStream.Length];
+        //        fileStream.Read(array, 0, array.Length);
+        //        string textFromFile = Encoding.Default.GetString(array);
+
+        //        Match match = Regex.Match(textFromFile, "Ben - 10 лет, паспорт - (.*?)");
+        //        if (match.Groups[1].Value.Contains(person.Passport.ToString()))
+        //        {
+        //            return person;
+        //        }
+        //    }
+        //    return null;
+        //}
+
         public IPerson FindEmployee(Employee employee)
         {
             IPerson result = Find<IPerson>(employee);
@@ -75,7 +108,7 @@ namespace BankSystem.Services
             return result;
         }
 
-        void CheckNull<T>(T result) where T : IPerson
+        private void CheckNull<T>(T result) where T : IPerson
         {
             try
             {
@@ -129,7 +162,51 @@ namespace BankSystem.Services
                 list.Add(account);
                 peoples.Add(client, list);
             }
+
+            AddDictionaryInFile();
         }
+
+        private void AddDictionaryInFile()
+        {
+            string path = Path.Combine("C:", "Users", "37377", "Documents", "GitHub", "DexPractice", "BankSystem", "DataPerson");
+
+            using (FileStream fileStream = new FileStream($"{path}\\Dictionary.txt", FileMode.Truncate))
+            {
+                byte[] array;
+                string result = "";
+                foreach (var item in peoples)
+                {
+                    result = $"Имя - {item.Key.Name}, Возраст - {item.Key.Age} лет, Паспорт - {item.Key.Passport}\n";
+
+                    for (int i = 0; i < item.Value.Count; i++)
+                    {
+                        result += $"Аккаунт: {i + 1})Сумма - {item.Value[i].Money}, Валюта - {item.Value[i].CurrencyType.Name}\n";
+                    }
+                }
+                array = Encoding.Default.GetBytes(result);
+                fileStream.Write(array, 0, array.Length);
+            }
+        }
+
+        //public Dictionary<Client, List<Account>> CreateDictionaryFromFile(string path, string fileName)// не смог сделать
+        //{
+        //    Dictionary<Client, List<Account>> dictionary = new Dictionary<Client, List<Account>>();
+        //    List<Account> listAccount = new List<Account>();
+
+        //    string[] lines = File.ReadAllLines($"{path}\\{fileName}.txt");
+
+        //    foreach (string line in lines)
+        //    {
+        //        string result = line.Split(new[] { ' ', ',', '-' }).ToString();
+
+        //        for (int i = 0; i < line.Length; i++)
+        //        {
+        //            result.IndexOf(" ");
+        //        }
+        //    }
+
+        //    return dictionary;
+        //} 
     }
 }
 
