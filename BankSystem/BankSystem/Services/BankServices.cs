@@ -170,7 +170,7 @@ namespace BankSystem.Services
         {
             string path = Path.Combine("C:", "Users", "37377", "Documents", "GitHub", "DexPractice", "BankSystem", "DataPerson");
 
-            using (FileStream fileStream = new FileStream($"{path}\\Dictionary.txt", FileMode.Truncate))
+            using (FileStream fileStream = new FileStream($"{path}\\Dictionary.txt", FileMode.Append))
             {
                 byte[] array;
                 string result = "";
