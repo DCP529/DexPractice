@@ -6,12 +6,13 @@ using System.IO;
 using System.Text;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
 namespace BankSystem.Services
 {
     public class BankServices
     {
-        private static Dictionary<Client, List<Account>> peoples = new Dictionary<Client, List<Account>>();
+        private static Dictionary<string, List<Account>> peoples = new Dictionary<string, List<Account>>();
 
         private static List<Client> clients = new List<Client>();
         private static List<Employee> employees = new List<Employee>();
@@ -58,7 +59,8 @@ namespace BankSystem.Services
         {
             using (FileStream fileStream = new FileStream($"{path}\\{nameFile}.txt", FileMode.Append))
             {
-                byte[] array = Encoding.Default.GetBytes($"Имя - {person.Name}, Возраст - {person.Age} лет, Паспорт - {person.Passport} \n");
+                var result = JsonConvert.SerializeObject(person);
+                byte[] array = Encoding.Default.GetBytes(result);
                 fileStream.Write(array, 0, array.Length);
             }
         }
@@ -75,61 +77,27 @@ namespace BankSystem.Services
             else if (person is Employee)
             {
                 var employee = person as Employee;
-                return FindInFile(path, "Client", employee);
+                return FindInFile(path, "Employee", employee);
             }
             return null;
         }
 
-        private IPerson FindInFile(string path, string name, IPerson person) // не работает
+        private IPerson FindInFile<T>(string path, string name, T person) where T : IPerson
         {
-            var listPerson = new List<IPerson>();
-            using (FileStream fileStream = new FileStream($"{path}\\{name}.txt", FileMode.Open))
+
+            using (StreamReader sr = new StreamReader($"{path}\\{name}.txt"))
             {
-                byte[] array = new byte[fileStream.Length];
-                fileStream.Read(array, 0, array.Length);
-                string textFromFile = Encoding.Default.GetString(array);
+                var result = sr.ReadToEnd();
+                var desFile = JsonConvert.DeserializeObject<T>(result);
 
-                string[] arrayFile = textFromFile.Split('\n');
-                for (int i = 0; i < arrayFile.Length; i++)
+                if (desFile.Passport == person.Passport)
                 {
-                    string[] arrayResult = arrayFile[i].Split();
-
-                    if (arrayFile[0] == "")
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        if (person is Client)
-                        {
-                            var client = person as Client;
-
-                            client.Passport = Convert.ToInt32(arrayResult[6]);
-                            client.Age = Convert.ToInt32(arrayResult[2]);
-                            client.Name = arrayResult[0];
-
-                            listPerson.Add(client);
-
-                            return listPerson.Find(item => item.Passport == person.Passport);
-                        }
-                        else if(person is Employee)
-                        {
-                            var employee = person as Employee;
-
-                            employee.Passport = Convert.ToInt32(arrayResult[6]);
-                            employee.Age = Convert.ToInt32(arrayResult[2]);
-                            employee.Name = arrayResult[0];
-
-                            listPerson.Add(employee);
-
-                            return listPerson.Find(item => item.Passport == person.Passport);
-                        }
-                    }
+                    return desFile;
                 }
             }
+
             return null;
         }
-
         public IPerson FindEmployee(Employee employee)
         {
             IPerson result = Find<IPerson>(employee);
@@ -142,7 +110,6 @@ namespace BankSystem.Services
             CheckNull<IPerson>(client);
             return result;
         }
-
         private void CheckNull<T>(T result) where T : IPerson
         {
             try
@@ -188,14 +155,14 @@ namespace BankSystem.Services
         {
             List<Account> list = new List<Account>();
 
-            if (peoples.ContainsKey(client))
+            if (peoples.ContainsKey(client.Passport.ToString()))
             {
-                peoples[client].Add(account);
+                peoples[client.Passport.ToString()].Add(account);
             }
             else
             {
                 list.Add(account);
-                peoples.Add(client, list);
+                peoples.Add(client.Passport.ToString(), list);
             }
 
             AddDictionaryInFile();
@@ -205,51 +172,21 @@ namespace BankSystem.Services
         {
             string path = Path.Combine("C:", "Users", "37377", "Documents", "GitHub", "DexPractice", "BankSystem", "DataPerson");
 
-            using (FileStream fileStream = new FileStream($"{path}\\Dictionary.txt", FileMode.Append))
+            using (StreamWriter sw = new StreamWriter($"{path}\\Dictionary.txt"))
             {
-                byte[] array;
-                string result = "";
-                foreach (var item in peoples)
-                {
-                    result = $"Имя - {item.Key.Name}, Возраст - {item.Key.Age} лет, Паспорт - {item.Key.Passport}\n";
-
-                    for (int i = 0; i < item.Value.Count; i++)
-                    {
-                        result += $"Аккаунт: {i + 1})Сумма - {item.Value[i].Money}, Валюта - {item.Value[i].CurrencyType.Name}\n";
-                    }
-                }
-                array = Encoding.Default.GetBytes(result);
-                fileStream.Write(array, 0, array.Length);
+                string result = JsonConvert.SerializeObject(peoples);
+                sw.Write(result);
             }
         }
 
-        public Dictionary<Client, List<Account>> CreateDictionaryFromFile(string path, string fileName) // недоделано
+        public Dictionary<string, List<Account>> CreateDictionaryFromFile(string path, string fileName)
         {
-            Dictionary<Client, List<Account>> dictionary = new Dictionary<Client, List<Account>>();
-            List<Account> listAccount = new List<Account>();
-
-            using (FileStream fileStream = File.OpenRead($"{path}\\{fileName}.txt"))
+            using (StreamReader sr = new StreamReader($"{path}\\{fileName}.txt"))
             {
-                byte[] array = new byte[fileStream.Length];
-                fileStream.Read(array, 0, array.Length);
-                var lines = Encoding.Default.GetString(array);
+                var result = sr.ReadToEnd();
+                var desFile = JsonConvert.DeserializeObject<Dictionary<string, List<Account>>>(result);
 
-                string[] arrayFile = lines.Split('\n');
-
-                for (int i = 0; i < arrayFile.Length; i++)
-                {
-                    string[] arrayResult = arrayFile[i].Split(new[] { ' ', '-', ',' });
-
-                    var client = new Client() { Name = arrayResult[3], Age = Convert.ToInt32(arrayResult[8]), Passport = Convert.ToInt32(arrayResult[14]) };
-
-                    //
-                    //здесь должно быть добавление аккаунтов
-                    //
-
-                    dictionary.Add(client, listAccount);
-
-                }
-                return dictionary;
+                return desFile;
             }
         }
 

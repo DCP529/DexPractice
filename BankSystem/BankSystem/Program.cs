@@ -12,6 +12,8 @@ namespace BankSystem
             BankServices bankServices = new BankServices();
             Exchange exchange = new Exchange();
 
+            string path = Path.Combine("C:", "Users", "37377", "Documents", "GitHub", "DexPractice", "BankSystem", "DataPerson");
+
             Account account1 = new Account() { Money = 15_000, CurrencyType = new Rub() };
             Account account2 = new Account() { Money = 15_000, CurrencyType = new Ua() };
 
@@ -23,15 +25,17 @@ namespace BankSystem
 
             bankServices.AddClientAccount(client1, account2);
             bankServices.AddClientAccount(client1, account1);
-            bankServices.MoneyTransfer(10_000, account1, account2, exchangeHandler);
+            //bankServices.MoneyTransfer(10_000, account1, account2, exchangeHandler);
 
-            string path = Path.Combine("C:", "Users", "37377", "Documents", "GitHub", "DexPractice", "BankSystem", "DataPerson");
+            bankServices.Add<IPerson>(client1);
+            //bankServices.Add<IPerson>(employee);
 
-            var client = bankServices.FindClient(client1);
+            var result1 = bankServices.FindClient(client1);
+            //var result2 = bankServices.FindEmployee(employee);
 
-            client = bankServices.FindClient(client2);
+            var dictionary = bankServices.CreateDictionaryFromFile(path, "Dictionary");
 
             Console.ReadLine();
         }
     }
-}
+}//богус генератор фкйкофых данных
