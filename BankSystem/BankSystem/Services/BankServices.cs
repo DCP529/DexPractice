@@ -188,25 +188,35 @@ namespace BankSystem.Services
             }
         }
 
-        //public Dictionary<Client, List<Account>> CreateDictionaryFromFile(string path, string fileName)// не смог сделать
-        //{
-        //    Dictionary<Client, List<Account>> dictionary = new Dictionary<Client, List<Account>>();
-        //    List<Account> listAccount = new List<Account>();
+        public Dictionary<Client, List<Account>> CreateDictionaryFromFile(string path, string fileName) // недоделанно
+        {
+            Dictionary<Client, List<Account>> dictionary = new Dictionary<Client, List<Account>>();
+            List<Account> listAccount = new List<Account>();
 
-        //    string[] lines = File.ReadAllLines($"{path}\\{fileName}.txt");
+            using (FileStream fileStream = File.OpenRead($"{path}\\{fileName}.txt"))
+            {
+                byte[] array = new byte[fileStream.Length];
+                fileStream.Read(array, 0, array.Length);
+                var lines = Encoding.Default.GetString(array);
 
-        //    foreach (string line in lines)
-        //    {
-        //        string result = line.Split(new[] { ' ', ',', '-' }).ToString();
+                string[] arrayFile = lines.Split('\n');
 
-        //        for (int i = 0; i < line.Length; i++)
-        //        {
-        //            result.IndexOf(" ");
-        //        }
-        //    }
+                for (int i = 0; i < arrayFile.Length; i++)
+                {
+                    string[] arrayResult = arrayFile[i].Split(new[] { ' ', '-', ',' });
 
-        //    return dictionary;
-        //} 
+                    var client = new Client() { Name = arrayResult[3], Age = Convert.ToInt32(arrayResult[8]), Passport = Convert.ToInt32(arrayResult[14])};
+
+                    //
+                    //здесь должно быть добавление аккаунтов
+                    //
+
+                    dictionary.Add(client, listAccount);
+
+                }
+                return dictionary;
+            }
+        }
+
     }
 }
-

@@ -24,8 +24,11 @@ namespace BankSystem
             bankServices.MoneyTransfer(10_000, account1, account2, exchangeHandler);
 
 
-            var client1 = bankServices.FindClient(client);
-            var emplowefwe = bankServices.FindEmployee(employee);
+            string path = Path.Combine("C:", "Users", "37377", "Documents", "GitHub", "DexPractice", "BankSystem", "DataPerson");
+            //var result = bankServices.CreateDictionaryFromFile(path, "Dictionary");
+
+            //var client1 = bankServices.FindClient(client);
+            //var emplowefwe = bankServices.FindEmployee(employee);
 
             Console.ReadLine();
         }
