@@ -65,35 +65,70 @@ namespace BankSystem.Services
 
         private IPerson Find<T>(T person) where T : IPerson
         {
+            string path = Path.Combine("C:", "Users", "37377", "Documents", "GitHub", "DexPractice", "BankSystem", "DataPerson");
+
             if (person is Client)
             {
                 var client = person as Client;
-                return clients.Find(item => item.Passport == client.Passport);
+                return FindInFile(path, "Client", client);
             }
             else if (person is Employee)
             {
                 var employee = person as Employee;
-                return employees.Find(item => item.Passport == employee.Passport);
+                return FindInFile(path, "Client", employee);
             }
             return null;
         }
 
-        //private IPerson FindInFile(string path, string name, IPerson person) // не работает
-        //{
-        //    using (FileStream fileStream = new FileStream($"{path}\\{name}.txt", FileMode.Open))
-        //    {
-        //        byte[] array = new byte[fileStream.Length];
-        //        fileStream.Read(array, 0, array.Length);
-        //        string textFromFile = Encoding.Default.GetString(array);
+        private IPerson FindInFile(string path, string name, IPerson person) // не работает
+        {
+            var listPerson = new List<IPerson>();
+            using (FileStream fileStream = new FileStream($"{path}\\{name}.txt", FileMode.Open))
+            {
+                byte[] array = new byte[fileStream.Length];
+                fileStream.Read(array, 0, array.Length);
+                string textFromFile = Encoding.Default.GetString(array);
 
-        //        Match match = Regex.Match(textFromFile, "Ben - 10 лет, паспорт - (.*?)");
-        //        if (match.Groups[1].Value.Contains(person.Passport.ToString()))
-        //        {
-        //            return person;
-        //        }
-        //    }
-        //    return null;
-        //}
+                string[] arrayFile = textFromFile.Split('\n');
+                for (int i = 0; i < arrayFile.Length; i++)
+                {
+                    string[] arrayResult = arrayFile[i].Split();
+
+                    if (arrayFile[0] == "")
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        if (person is Client)
+                        {
+                            var client = person as Client;
+
+                            client.Passport = Convert.ToInt32(arrayResult[6]);
+                            client.Age = Convert.ToInt32(arrayResult[2]);
+                            client.Name = arrayResult[0];
+
+                            listPerson.Add(client);
+
+                            return listPerson.Find(item => item.Passport == person.Passport);
+                        }
+                        else if(person is Employee)
+                        {
+                            var employee = person as Employee;
+
+                            employee.Passport = Convert.ToInt32(arrayResult[6]);
+                            employee.Age = Convert.ToInt32(arrayResult[2]);
+                            employee.Name = arrayResult[0];
+
+                            listPerson.Add(employee);
+
+                            return listPerson.Find(item => item.Passport == person.Passport);
+                        }
+                    }
+                }
+            }
+            return null;
+        }
 
         public IPerson FindEmployee(Employee employee)
         {
@@ -205,7 +240,7 @@ namespace BankSystem.Services
                 {
                     string[] arrayResult = arrayFile[i].Split(new[] { ' ', '-', ',' });
 
-                    var client = new Client() { Name = arrayResult[3], Age = Convert.ToInt32(arrayResult[8]), Passport = Convert.ToInt32(arrayResult[14])};
+                    var client = new Client() { Name = arrayResult[3], Age = Convert.ToInt32(arrayResult[8]), Passport = Convert.ToInt32(arrayResult[14]) };
 
                     //
                     //здесь должно быть добавление аккаунтов
