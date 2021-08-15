@@ -188,7 +188,7 @@ namespace BankSystem.Services
             }
         }
 
-        public Dictionary<Client, List<Account>> CreateDictionaryFromFile(string path, string fileName) // недоделанно
+        public Dictionary<Client, List<Account>> CreateDictionaryFromFile(string path, string fileName) // недоделано
         {
             Dictionary<Client, List<Account>> dictionary = new Dictionary<Client, List<Account>>();
             List<Account> listAccount = new List<Account>();
