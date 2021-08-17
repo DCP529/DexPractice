@@ -45,23 +45,56 @@ namespace BankSystem.Services
             {
                 var client = person as Client;
                 clients.Add(client);
-                WriteFile(path, person, "Client");
+                WriteClientFile(path, client, "Client");
             }
             else if (person is Employee)
             {
                 var employee = person as Employee;
                 employees.Add(employee);
-                WriteFile(path, person, "Employee");
+                WriteEmployeeFile(path, employee, "Employee");
             }
         }
 
-        private void WriteFile(string path, IPerson person, string nameFile)
+        private void WriteClientFile(string path, Client person, string nameFile) 
         {
-            using (FileStream fileStream = new FileStream($"{path}\\{nameFile}.txt", FileMode.Append))
+            using (StreamReader sr = new StreamReader($"{path}\\{nameFile}.txt"))
             {
-                var result = JsonConvert.SerializeObject(person);
-                byte[] array = Encoding.Default.GetBytes(result);
-                fileStream.Write(array, 0, array.Length);
+                var textFile = sr.ReadToEnd();
+                var personList = JsonConvert.DeserializeObject<List<Client>>(textFile);
+                if (personList == null)
+                {
+                    personList = new List<Client>();
+                }
+                personList.Add(person);
+
+                var result = JsonConvert.SerializeObject(personList);
+
+                sr.Dispose();
+
+                StreamWriter streamWriter = new StreamWriter($"{path}\\{nameFile}.txt");
+                streamWriter.Write(result);
+                streamWriter.Dispose();
+            }
+        }
+        private void WriteEmployeeFile(string path, Employee person, string nameFile)
+        {
+            using (StreamReader sr = new StreamReader($"{path}\\{nameFile}.txt"))
+            {
+                var textFile = sr.ReadToEnd();
+                var personList = JsonConvert.DeserializeObject<List<Employee>>(textFile);
+                if (personList == null)
+                {
+                    personList = new List<Employee>();
+                }
+                personList.Add(person);
+
+                var result = JsonConvert.SerializeObject(personList);
+
+                sr.Dispose();
+
+                StreamWriter streamWriter = new StreamWriter($"{path}\\{nameFile}.txt");
+                streamWriter.Write(result);
+                streamWriter.Dispose();
             }
         }
 
@@ -84,16 +117,20 @@ namespace BankSystem.Services
 
         private IPerson FindInFile<T>(string path, string name, T person) where T : IPerson
         {
-
             using (StreamReader sr = new StreamReader($"{path}\\{name}.txt"))
             {
                 var result = sr.ReadToEnd();
-                var desFile = JsonConvert.DeserializeObject<T>(result);
 
-                if (desFile.Passport == person.Passport)
+                var desFile = JsonConvert.DeserializeObject<List<T>>(result);
+
+                foreach (var item in desFile)
                 {
-                    return desFile;
+                    if (item.Passport == person.Passport)
+                    {
+                        return item;
+                    }
                 }
+
             }
 
             return null;

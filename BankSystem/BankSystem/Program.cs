@@ -27,10 +27,10 @@ namespace BankSystem
             bankServices.AddClientAccount(client1, account1);
             //bankServices.MoneyTransfer(10_000, account1, account2, exchangeHandler);
 
-            bankServices.Add<IPerson>(client1);
+            bankServices.Add<IPerson>(client2);
             //bankServices.Add<IPerson>(employee);
 
-            var result1 = bankServices.FindClient(client1);
+            var result1 = bankServices.FindClient(client2);
             //var result2 = bankServices.FindEmployee(employee);
 
             var dictionary = bankServices.CreateDictionaryFromFile(path, "Dictionary");
