@@ -1,0 +1,1 @@
+[{"Name":"Gof","Age":15,"Passport":2,"Wage":0.0},{"Name":"Gof","Age":15,"Passport":2,"Wage":0.0},{"Name":"Gof","Age":15,"Passport":2,"Wage":0.0},{"Name":"Gof","Age":15,"Passport":2,"Wage":0.0},{"Name":"Gof","Age":15,"Passport":2,"Wage":0.0}]
